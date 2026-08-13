@@ -1,7 +1,7 @@
 {
-  "version": "10.0.0",
+  "version": "10.0.1",
   "published_at": "2026-08-13",
-  "notes": "Kalıcı kurulum ve otomatik güncelleme altyapısı aktif edildi.",
-  "package_url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/update-10.0.0.zip",
-  "sha256": "1007614f536c650b141cf1fbbf0ddba60dd1812de51575400c16747490d22b8c"
+  "notes": "Hepsiburada Satıcı Paneli üzerinden gerçek mağaza fiyat/stok okuma ilk sürümü.",
+  "package_url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/update-10.0.1.zip",
+  "sha256": "19de7d1d45b4695d2e7d7b15f3881b64efb169c435500c453b3a8cb87de2bcaf"
 }
