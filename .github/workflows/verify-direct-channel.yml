@@ -1,0 +1,24 @@
+name: Verify Direct Update Channel
+on:
+  push:
+    paths:
+      - 'channel.json'
+      - 'direct/**'
+      - '.github/workflows/verify-direct-channel.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify published raw bytes
+        run: |
+          python - <<'PY'
+          import json,hashlib,urllib.request,time
+          m=json.load(open('channel.json',encoding='utf-8'))
+          time.sleep(2)
+          for f in m.get('files',[]):
+              data=urllib.request.urlopen(f['url']+'?verify=1',timeout=30).read()
+              got=hashlib.sha256(data).hexdigest()
+              assert got==f['sha256'], (f['path'],got,f['sha256'])
+              print('OK',f['path'],got)
+          PY
