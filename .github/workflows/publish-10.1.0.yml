@@ -1,0 +1,39 @@
+name: Publish 10.1.0 Bootstrap
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/publish_10_1_0.py'
+      - '.github/workflows/publish-10.1.0.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build bootstrap
+        run: python tools/publish_10_1_0.py
+      - name: Validate
+        shell: pwsh
+        run: |
+          $m = Get-Content latest.json -Raw | ConvertFrom-Json
+          $c = Get-Content channel.json -Raw | ConvertFrom-Json
+          if ($m.version -ne '10.1.0') { throw 'latest version mismatch' }
+          if ($c.version -ne '10.1.0') { throw 'channel version mismatch' }
+          if (-not (Test-Path update-10.1.0.zip)) { throw 'package missing' }
+      - name: Publish atomically
+        shell: bash
+        run: |
+          git config user.name "Topaloglu Update Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add update-10.1.0.zip latest.json channel.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish bootstrap 10.1.0"
+          git push
