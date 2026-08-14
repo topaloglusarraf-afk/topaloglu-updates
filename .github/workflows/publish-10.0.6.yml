@@ -1,0 +1,37 @@
+name: Publish 10.0.6
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-10.0.6.yml'
+      - 'tools/publish_10_0_6.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build update package
+        run: python tools/publish_10_0_6.py
+      - name: Validate manifest
+        shell: pwsh
+        run: |
+          $m = Get-Content latest.json -Raw | ConvertFrom-Json
+          if ($m.version -ne '10.0.6') { throw 'Manifest version mismatch' }
+          if (-not (Test-Path update-10.0.6.zip)) { throw 'Update package missing' }
+      - name: Commit published update
+        shell: bash
+        run: |
+          git config user.name "Topaloglu Update Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add update-10.0.6.zip latest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish update 10.0.6"
+          git push
