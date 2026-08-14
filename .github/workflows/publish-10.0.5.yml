@@ -18,6 +18,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Repair publisher wrapper
+        shell: pwsh
+        run: |
+          $p = 'tools/publish_10_0_5.py'
+          $s = Get-Content $p -Raw
+          $s = $s.Replace('"))).decode())','")).decode())')
+          Set-Content -Path $p -Value $s -Encoding UTF8
       - name: Build update package
         run: python tools/publish_10_0_5.py
       - name: Validate manifest
