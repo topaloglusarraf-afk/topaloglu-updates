@@ -1,0 +1,25 @@
+name: Publish 10.1.3 Direct Files
+on:
+  push:
+    paths:
+      - 'tools/publish_10_1_3.py'
+      - '.github/workflows/publish-10.1.3.yml'
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and validate
+        run: python tools/publish_10_1_3.py
+      - name: Publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add direct/10.1.3 channel.json
+          git commit -m "Publish 10.1.3 direct update"
+          git push
