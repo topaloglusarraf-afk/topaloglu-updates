@@ -1,7 +1,7 @@
 {
-  "version": "10.0.2",
+  "version": "10.0.3",
   "published_at": "2026-08-14",
-  "notes": "Hepsiburada normal Chrome eklentisi ile Satıcı Paneli fiyat/stok aktarımı eklendi.",
-  "package_url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/update-10.0.2.zip",
-  "sha256": "42bc483164c9ec18c56a7267fd03699a3ce276f40a3770fd29940d1414d1f110"
+  "notes": "Hepsiburada Chrome eklentisi artık React/div listelerini ve sayfanın fiyat-stok JSON cevaplarını okuyabiliyor.",
+  "package_url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/update-10.0.3.zip",
+  "sha256": "3d1f25481784022aa70b43f00956501bd746790e90902e155b44d703d09df925"
 }
