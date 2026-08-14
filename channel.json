@@ -6,12 +6,12 @@
     {
       "path": "app/main.py",
       "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.1/app/main.py",
-      "sha256": "948faeea6a55021b1e22656673953ddf15688bde7b0b529de6a12f0188040fe8"
+      "sha256": "9326e08c4ef5e304bd3f9c5817e00ef1fed8582bfca57f43b040248caf7bc558"
     },
     {
       "path": "app/static/app.js",
       "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.1/app/static/app.js",
-      "sha256": "7cdb59d6bc5f6a65ca7d164cb400cc3bebe7249cb85ef601ba79b23e99498719"
+      "sha256": "64a68b3b8840328b9289d092dda262ff4bc0d7f4090b6274bbbb79f57f5e8c29"
     }
   ]
 }
