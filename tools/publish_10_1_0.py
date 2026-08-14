@@ -8,6 +8,10 @@ src=src.replace('WORK = ROOT / "_build-10.0.7"','WORK = ROOT / "_build-10.1.0-st
 src=src.replace('OUT = ROOT / "update-10.0.7.zip"','OUT = ROOT / "_stage-10.0.7.zip"')
 src=src.replace('if start<0 or end<0: raise SystemExit("renderWallAlerts block missing")','if start<0 or end<0:\n    start=-1; end=-1')
 src=src.replace('s=s[:start]+new_renderer+s[end:]','s=(s[:start]+new_renderer+s[end:]) if start>=0 and end>=0 else s')
+# Old publisher used raw strings with literal \\n sequences. Convert those injected JS/CSS strings to normal Python strings.
+src=src.replace("selection_js=r'''","selection_js='''")
+src=src.replace("new_renderer=r'''","new_renderer='''")
+src=src.replace("s += r'''","s += '''")
 patched=ROOT/'_publish_stage.py';patched.write_text(src,encoding='utf-8')
 subprocess.run([sys.executable,str(patched)],check=True)
 
