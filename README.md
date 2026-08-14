@@ -1,3 +1,7 @@
-# Topaloğlu Pazaryeri Merkezi Güncellemeleri
+# Topaloğlu Update Channel
 
-Bu depo yalnız uygulamanın güncelleme dosyalarını içerir. Buraya .env, API anahtarı, şifre, token veya veritabanı yüklenmez.
+Bu repo Topaloğlu Pazaryeri Merkezi güncelleme dosyalarını barındırır.
+
+- `latest.json`: eski tam paket güncelleme kanalı / bootstrap
+- `channel.json`: 10.1.0+ doğrudan değişen dosya güncelleme kanalı
+- `.env`, veritabanı, parola, token veya API anahtarı burada tutulmaz.
