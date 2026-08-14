@@ -1,8 +1,17 @@
 {
-  "version": "10.1.0",
+  "version": "10.1.1",
   "published_at": "2026-08-14",
-  "notes": "Doğrudan dosya güncelleme kanalı aktif.",
-  "files": [],
-  "package_url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/update-10.1.0.zip",
-  "sha256": "1223957f9ed522771daa484d5ede38eecc6c3dfb0270f4f319fba0876cb706d4"
+  "notes": "Kritik kayıtları sıfırlama, ortak ekran yenileme ve kontrol dışı pazaryeri kayıtlarını temizleme.",
+  "files": [
+    {
+      "path": "app/main.py",
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.1/app/main.py",
+      "sha256": "948faeea6a55021b1e22656673953ddf15688bde7b0b529de6a12f0188040fe8"
+    },
+    {
+      "path": "app/static/app.js",
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.1/app/static/app.js",
+      "sha256": "7cdb59d6bc5f6a65ca7d164cb400cc3bebe7249cb85ef601ba79b23e99498719"
+    }
+  ]
 }
