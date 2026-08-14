@@ -1,0 +1,31 @@
+name: Verify 10.1.5 Raw Hashes
+on:
+  push:
+    paths:
+      - 'direct/10.1.5/**'
+      - 'channel.json'
+      - '.github/workflows/verify-10.1.5.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify published raw bytes
+        run: |
+          python - <<'PY'
+          import json,hashlib,urllib.request,time
+          ch=json.load(open('channel.json',encoding='utf-8'))
+          assert ch['version']=='10.1.5'
+          for f in ch['files']:
+              last=None
+              for _ in range(8):
+                  try:
+                      b=urllib.request.urlopen(f['url']+'?v='+str(time.time()),timeout=20).read()
+                      got=hashlib.sha256(b).hexdigest()
+                      if got==f['sha256']:
+                          print('OK',f['path'],got);break
+                      last=(got,f['sha256'])
+                  except Exception as e:last=e
+                  time.sleep(2)
+              else:raise SystemExit(f'hash mismatch {f["path"]}: {last}')
+          PY
