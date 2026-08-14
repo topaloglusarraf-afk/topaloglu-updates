@@ -18,6 +18,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Repair wallboard patch fallback
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          p=Path('tools/publish_10_0_7.py')
+          s=p.read_text(encoding='utf-8')
+          old='if start<0 or end<0: raise SystemExit("renderWallAlerts block missing")\ns=s[:start]+new_renderer+s[end:]'
+          new='if start<0 or end<0:\n    s += "\\n" + new_renderer\nelse:\n    s=s[:start]+new_renderer+s[end:]'
+          if old not in s:
+              raise SystemExit('publisher repair point missing')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          '@ | Set-Content -Encoding utf8 repair_publish.py
+          python repair_publish.py
       - name: Build update package
         run: python tools/publish_10_0_7.py
       - name: Validate manifest
