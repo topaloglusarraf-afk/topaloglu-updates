@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Topaloğlu Pazaryeri Merkezi</title>
+<link rel="stylesheet" href="/static/style.css?v=10.1.2">
+</head>
+<body class="premium-v2">
+<div class="ambient a1"></div><div class="ambient a2"></div>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">T</div><div><strong>Topaloğlu Altın</strong><span>Pazaryeri Merkezi v10.1.2</span></div></div>
+    <nav>
+      <button class="nav active" data-view="operations"><i>◆</i> Pazaryeri Merkezi</button>
+      <button class="nav" data-view="dashboard"><i>◫</i> Fiyat Koruma</button>
+      <button class="nav" data-view="single-product"><i>⌕</i> Tek Ürün Kontrol</button>
+      <button class="nav" data-view="mapping"><i>⇄</i> Manuel Eşleştirme</button>
+      <button class="nav" data-view="debug"><i>⌁</i> API Teşhis</button>
+      <button class="nav" data-view="products"><i>◇</i> Ürün Grupları</button>
+      <button class="nav" data-view="events"><i>◷</i> Olay Geçmişi</button>
+    </nav>
+    <div class="notification-state"><i>●</i><div><b>Masaüstü Bildirimleri</b><span>Yeni fiyat riski oluşunca aktif</span></div></div><div class="sidebar-card"><span>ALARM TOLERANSI</span><strong id="tolChip">1.000 TL</strong><small>Bu tutara kadar farklar normal kabul edilir.</small></div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-copy">
+        <div class="eyebrow"><span class="live-dot"></span> CANLI PAZARYERİ GÜVENLİĞİ</div>
+        <h1>Kontrol Merkezi</h1>
+        <p>Fiyat güvenliği, stok sağlığı, satış durumu ve pazaryeri eşleşmeleri tek ekranda.</p>
+      </div>
+      <div class="toolbar">
+        <button id="syncBtn" class="btn ghost">T-Soft Senkronla</button>
+        <div class="single-check">
+          <select id="singleMarket"><option value="">Pazaryeri seç</option><option>Trendyol</option><option>Idefix</option><option>Hepsiburada</option><option>N11</option><option>Pazarama</option></select>
+          <button id="singleCheckBtn" class="btn ghost">Seçileni Kontrol Et</button>
+        </div>
+        <div class="update-pill" id="updatePill"><span id="updateDot"></span><b id="updateVersion">v10.0</b><button id="updateCheckBtn" class="btn ghost">Güncellemeyi Kontrol Et</button><button id="updateInstallBtn" class="btn primary hidden">Güncelle</button></div>
+          <button id="notifyTestBtn" class="btn notify-btn">🔔 Bildirimi Test Et</button><button id="checkBtn" class="btn primary">Tümünü Kontrol Et</button>
+      </div>
+    </header>
+
+    
+    <section id="view-operations" class="view active wallboard-view"><section id="wallStatus" class="wall-status wall-ok"><div class="wall-signal"><span></span></div><div class="wall-copy"><span id="wallEyebrow">PAZARYERİ FİYAT KONTROLÜ</span><h1 id="wallTitle">Kontrol ediliyor</h1><p id="wallMessage">Güncel kayıtlar yükleniyor.</p></div><div class="wall-tools"><div><span>Son yenileme</span><b id="wallUpdated">—</b></div><button id="wallCheckBtn" class="wall-btn">Şimdi Kontrol Et</button><button id="wallFullscreenBtn" class="wall-btn ghost">Tam Ekran</button></div></section><section class="wall-kpis"><article><span>Kritik Hata</span><strong id="wallCritical">0</strong><small>1.000 TL tolerans üzeri</small></article><article><span>Uyarı</span><strong id="wallWarning">0</strong><small>Kontrol bekleyen</small></article><article><span>İzlenen Ürün</span><strong id="wallProducts">0</strong><small>T-Soft</small></article></section><section class="wall-panel"><div class="wall-head"><div><span>AKTİF UYARILAR</span><h2 id="wallListTitle">Sorunlu fiyat yok</h2></div><div id="wallMarketHealth" class="wall-markets"></div></div><div id="wallAlertList"></div></section></section>
+
+<section id="view-dashboard" class="view">
+      <section class="executive-grid">
+        <article class="hero-card glass">
+          <div class="hero-copy">
+            <span class="kicker">PORTFÖY GÖRÜNÜMÜ</span>
+            <div class="hero-value" id="s-products">0</div>
+            <div class="hero-label">T-Soft ürün izleniyor</div>
+          </div>
+          <div class="hero-health">
+            <div class="health-ring"><span id="healthScore">—</span><small>Sağlık</small></div>
+            <div class="hero-metrics">
+              <span>Fiyatı güvenli <b id="s-ok">0</b></span>
+              <span>Çözülemeyen <b id="s-unresolved">0</b></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="metric-card danger glass">
+          <div class="metric-icon">!</div><div><span>Zarar Riski</span><strong id="s-loss2">0</strong><small>Net kayıp toleransın üzerinde</small></div>
+        </article>
+        <article class="metric-card warning glass">
+          <div class="metric-icon">↕</div><div><span>Fiyat Sapması</span><strong id="s-alerts2">0</strong><small>Beklenen fiyat bandı dışında</small></div>
+        </article>
+        <article class="metric-card stock glass">
+          <div class="metric-icon">0</div><div><span>Stok 0</span><strong id="s-stock-zero">0</strong><small>Fiyat alarmından hariç</small></div>
+        </article>
+        <article class="metric-card closed glass">
+          <div class="metric-icon">×</div><div><span>Satışa Kapalı</span><strong id="s-closed">0</strong><small>Fiyat alarmından hariç</small></div>
+        </article>
+      </section>
+
+      
+      <section class="protection-picker glass" id="protectionPicker">
+        <div class="protection-picker-copy"><span>FİYAT KORUMA KAPSAMI</span><b>Hangi pazaryerleri kontrol edilsin?</b></div>
+        <div class="protection-market-pills" id="protectionMarketPills"></div>
+        <div class="protection-picker-actions">
+          <button id="protectionAllBtn" class="protection-action">Tümünü Seç</button>
+          <button id="protectionResetBtn" class="protection-action danger">Tümünü Sıfırla</button>
+        </div>
+      </section>
+
+      <section class="exclusion-studio glass" id="exclusionStudio"><div class="exclusion-head"><div><span>AKILLI FİYAT KORUMA</span><h2>Hariç Ürünler & Sessiz İzleme</h2><p>Kalze Set gibi özel ürünleri isim kuralıyla topluca veya tek ürün koduyla alarmdan çıkar.</p></div><div class="exclusion-count"><strong id="excludedRuleCount">0</strong><span>aktif kural</span></div></div><div class="exclusion-form"><select id="exclusionType"><option value="name">Ürün adında geçen</option><option value="product">ET / ürün kodu</option><option value="category">Kategori içerir</option></select><input id="exclusionValue" placeholder="Örn: Kalze Set"><select id="exclusionMode"><option value="EXCLUDE">Tam Hariç</option><option value="SILENT">Sessiz İzle</option></select><select id="exclusionMarket"><option value="*">Tüm pazaryerleri</option><option>Trendyol</option><option>Hepsiburada</option><option>N11</option><option>Idefix</option><option>Pazarama</option></select><button id="exclusionAddBtn" class="premium-action">Kural Ekle</button></div><div class="exclusion-presets"><button data-preset="Kalze Set">+ Kalze Setleri Hariç Tut</button><button data-preset="Hint Set">+ Hint Setleri Hariç Tut</button><span>Hazır kurallar tek tıkla eklenir.</span></div><div id="exclusionRules" class="exclusion-rules"></div></section><section class="market-grid" id="marketStrip"></section>
+
+      <section class="panel glass">
+        <div class="market-tabs" id="marketTabs"></div>
+        <div class="panel-head">
+          <div><div class="section-kicker">FİYAT GÜVENLİĞİ</div><h2>Fiyat Riskleri</h2><p>Yalnız satışta ve stokta olan ürünlerin fiyat/komisyon analizi. Stok 0 ve kapalı ürünler bu tabloya girmez.</p></div>
+          <div class="filters"><label class="switch"><input type="checkbox" id="riskOnly" checked><span></span> Sadece riskliler</label><select id="statusFilter">
+      <option value="">Tüm durumlar</option>
+      <option value="LOSS">Zarar</option>
+      <option value="CRITICAL">Kritik</option>
+      <option value="WARNING">Uyarı</option>
+      <option value="OK">Normal</option>
+      <option value="UNRESOLVED">Eşleşmedi</option>
+      <option value="REVIEW">İncelenecek</option>
+      <option value="IGNORED">Dikkate Alınmadı</option>
+    </select><input id="search" placeholder="SKU, ürün, barkod ara"></div>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Durum</th><th>Pazaryeri</th><th>ET Barkod</th><th>Ürün</th><th>T-Soft Fiyat</th><th>Komisyon</th><th>Pazaryeri Fiyat</th><th>Net Kalan</th><th>Net Fark</th><th>Beklenen Fark</th></tr></thead><tbody id="checksBody"></tbody></table></div>
+      </section>
+
+      <section class="panel glass availability-panel">
+        <div class="panel-head">
+          <div>
+            <div class="section-kicker">OPERASYON KONTROLÜ</div>
+            <h2>Stok & Yayın Durumu</h2>
+            <p>Stok 0 veya satışa kapalı ürünler burada izlenir. Bu kayıtlar fiyat hatası olarak değerlendirilmez.</p>
+          </div>
+          <div class="filters">
+            <select id="availabilityMarket">
+              <option value="">Tüm pazaryerleri</option>
+              <option>Trendyol</option><option>Hepsiburada</option><option>N11</option><option>Idefix</option><option>Pazarama</option>
+            </select>
+            <select id="availabilityStatus">
+              <option value="">Tüm operasyon durumları</option>
+              <option>STOK YOK</option>
+              <option>SATIŞA KAPALI</option>
+            </select>
+            <input id="availabilitySearch" placeholder="SKU veya ürün ara">
+          </div>
+        </div>
+        <div class="availability-summary">
+          <div><span>Toplam operasyon kaydı</span><b id="a-total">0</b></div>
+          <div><span>Stok 0</span><b id="a-stock">0</b></div>
+          <div><span>Satışa kapalı</span><b id="a-closed">0</b></div>
+        </div>
+        <div class="table-wrap availability-table">
+          <table>
+            <thead><tr><th>Durum</th><th>Pazaryeri</th><th>ET Barkod</th><th>Ürün</th><th>Market SKU</th><th>Eşleşme</th><th>Market Stok</th><th>Son Fiyat</th><th>Açıklama</th></tr></thead>
+            <tbody id="availabilityBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    
+    <section id="view-single-product" class="view">
+      <section class="single-product-shell">
+        <article class="single-hero glass">
+          <div><div class="section-kicker">ANLIK DERİN KONTROL</div><h2>Tek Ürün Kontrolü</h2><p>ET barkodu, T-Soft ürün kodu veya eski TP kodunu gir. Yalnız bu ürün bağlı pazaryerlerinde anında kontrol edilsin.</p></div>
+          <div class="single-product-form"><input id="singleProductCode" placeholder="Örn: ET356574 veya TP1148"><button id="singleProductBtn" class="btn primary">Tüm Pazaryerlerinde Kontrol Et</button></div>
+        </article>
+        <div id="singleProductResult" class="single-result"><div class="single-empty glass"><div class="empty-icon">⌕</div><h3>Ürün kodunu gir</h3><p>Fiyat, stok, eşleşme ve risk durumu pazaryeri bazında gösterilir.</p></div></div>
+      </section>
+    </section>
+
+<section id="view-mapping" class="view">
+      <section class="mapping-layout">
+        <article class="panel glass mapping-left">
+          <div class="panel-head"><div><h2>Çözülemeyen Ürünler</h2><p>Önce ET barkod/ürün kodu ve birebir ürün adı otomatik eşleştirilir. Buraya yalnız kalan istisnalar düşer.</p></div><select id="mappingMarket"><option>Idefix</option><option>Trendyol</option><option>Hepsiburada</option><option>N11</option><option>Pazarama</option></select></div>
+          <div class="mapping-search"><input id="unresolvedSearch" placeholder="ET barkod, ürün kodu veya ürün ara"></div>
+          <div id="unresolvedList" class="unresolved-list"></div>
+        </article>
+
+        <article class="panel glass mapping-right">
+          <div class="mapping-empty" id="mappingEmpty"><div class="empty-icon">⇄</div><h3>Bir T-Soft ürünü seç</h3><p>Sol taraftan çözülemeyen ürünü seçip pazaryerindeki karşılığını bağlayabilirsin.</p></div>
+          <div id="mappingEditor" class="mapping-editor hidden">
+            <div class="selected-product"><span>T-SOFT ÜRÜNÜ</span><h2 id="mapProductName">—</h2><div class="meta"><b id="mapProductCode">—</b><span id="mapProductBarcode">—</span></div></div>
+            <div class="suggestion-section">
+              <div class="suggestion-title">
+                <div><span>AKILLI ÖNERİLER</span><h3>En yakın 5 aday</h3><p>Ürün adı, SKU, ana SKU ve barkod benzerliğine göre sıralanır.</p></div>
+                <button id="refreshSuggestions" class="mini-btn">Yenile</button>
+              </div>
+              <div id="suggestionList" class="suggestion-list"></div>
+            </div>
+
+            
+            <div class="direct-mapping-box">
+              <div class="direct-map-head"><span>DOĞRUDAN EŞLEŞTİR</span><h3>Barkod / SKU ile kalıcı eşleştirme</h3><p>Değeri elle girip kaydet. Uygulama yeniden açılsa bile korunur.</p></div>
+              <div class="direct-map-form">
+                <select id="manualMatchKey"><option value="barcode">Barkod</option><option value="stock_code">Pazaryeri SKU / Ürün Kodu</option><option value="product_main_id">Ana Ürün Kodu / Main ID</option></select>
+                <input id="manualMatchValue" placeholder="Barkod veya SKU gir">
+                <input id="manualMatchTitle" placeholder="Ürün adı (opsiyonel)">
+                <button id="manualSaveBtn" class="btn primary">Eşleştirmeyi Kaydet</button>
+              </div>
+              <div id="manualSaveState" class="manual-save-state"></div>
+            </div>
+<div class="candidate-head"><div><h3>Manuel arama</h3><p>Önerilerde yoksa SKU, barkod veya ürün adıyla ara.</p></div><input id="candidateSearch" placeholder="Pazaryeri SKU / barkod / ürün adı"></div>
+            <div id="candidateList" class="candidate-list"></div>
+          </div>
+        </article>
+      </section>
+    </section>
+
+    
+    <section id="view-debug" class="view">
+      <section class="panel glass">
+        <div class="panel-head">
+          <div><h2>API Teşhis</h2><p>Idefix ve Pazarama'nın gerçekten hangi alanları döndürdüğünü gösterir. Key/secret/token bilgileri gösterilmez.</p></div>
+          <div class="filters">
+            <select id="debugMarket"><option>Idefix</option><option>Pazarama</option><option>Hepsiburada</option></select>
+            <button id="debugBtn" class="btn ghost">İlk 5 Kaydı Göster</button>
+          </div>
+        </div>
+        
+        
+        <div class="hb-extension-card glass" id="hbExtensionCard"><div><span class="eyebrow">HEPSİBURADA CHROME EKLENTİSİ</span><h3>Normal Chrome'dan Gerçek Fiyatları Aktar</h3><p>Normal Chrome ile Hepsiburada Satıcı Paneli'ne giriş yapın. Eklenti açık ürün/listing ekranındaki fiyat ve stokları bu uygulamaya gönderir. Otomasyonlu tarayıcı kullanılmaz.</p></div><div class="hb-extension-actions"><button class="btn primary" id="hbExtensionStatusBtn">Eklenti Bağlantısını Kontrol Et</button></div><div class="hb-extension-steps"><b>Bir kez:</b> Chrome → Uzantılar → Geliştirici modu → Paketlenmemiş öğe yükle → <code>chrome-extension-hepsiburada</code> klasörünü seç.</div><div id="hbExtensionStatus" class="hb-diag-message">Eklentiden henüz veri gelmedi.</div></div><div id="hbWebReader" class="hb-web glass">
+          <div class="hb-diag-head">
+            <div><span>HEPSİBURADA WEB OKUMA</span><h3>API'siz Fiyat Kontrolü</h3><p>Herkese açık Hepsiburada ürün sayfasını okuyarak ürün ve fiyatı doğrular. Satıcı doğrulanmazsa fiyat alarmı üretmez.</p></div>
+            <button id="hbWebTestBtn" class="btn primary">Web Erişimini Test Et</button>
+          </div>
+          <div class="hb-web-search">
+            <input id="hbWebQuery" placeholder="ET barkod veya T-Soft ürün kodu">
+            <button id="hbWebReadBtn" class="btn ghost">Web'den Ürünü Oku</button>
+          </div>
+          <div id="hbWebState" class="hb-diag-message">Henüz web okuması yapılmadı.</div>
+          <div id="hbWebResult" class="hb-web-result"></div>
+        </div>
+<div id="hbDiagnostics" class="hb-diag glass">
+          <div class="hb-diag-head">
+            <div>
+              <span>HEPSİBURADA API TEŞHİSİ</span>
+              <h3>3 Servisi Ayrı Ayrı Test Et</h3>
+              <p>Aynı Merchant ID + kullanıcı + servis anahtarıyla Listing, Katalog ve Sipariş yetkisini karşılaştırır.</p>
+            </div>
+            <button id="hbDiagBtn" class="btn ghost">3 Servisi Test Et</button>
+          </div>
+
+          <div id="hbDiagConfig" class="hb-diag-grid">
+            <div><span>Ortam</span><b>—</b></div>
+            <div><span>Merchant ID</span><b>—</b></div>
+            <div><span>Username</span><b>—</b></div>
+            <div><span>Servis Anahtarı</span><b>—</b></div>
+            <div><span>User-Agent</span><b>—</b></div>
+          </div>
+
+          <div id="hbServiceTests" class="hb-service-tests">
+            <article class="hb-service-card"><span>LISTING</span><h4>Fiyat & Stok</h4><b>Henüz test edilmedi</b><small>—</small></article>
+            <article class="hb-service-card"><span>MPOP</span><h4>Katalog</h4><b>Henüz test edilmedi</b><small>—</small></article>
+            <article class="hb-service-card"><span>OMS</span><h4>Sipariş</h4><b>Henüz test edilmedi</b><small>—</small></article>
+          </div>
+
+          <div id="hbDiagMessage" class="hb-diag-message">Henüz test edilmedi.</div>
+        </div>
+        <div id="debugContent" class="debug-content">
+          <div class="mapping-empty"><div class="empty-icon">⌁</div><h3>Ham alanları görelim</h3><p>Bir pazaryeri seçip İlk 5 Kaydı Göster'e bas. TP kodu ve ürün adının gerçek API alanını buradan bulacağız.</p></div>
+        </div>
+      </section>
+    </section>
+
+<section id="view-products" class="view"><section class="panel glass"><div class="panel-head"><div><h2>Ürün Grupları</h2><p>Komisyon fallback hesabı için ürün sınıfını düzelt.</p></div><input id="productSearch" placeholder="Ürün ara"></div><div class="table-wrap"><table><thead><tr><th>ET Barkod</th><th>Ürün</th><th>Kategori</th><th>Alış</th><th>Satış</th><th>Grup</th></tr></thead><tbody id="productsBody"></tbody></table></div></section></section>
+
+    <section id="view-events" class="view"><section class="panel glass"><div class="panel-head"><div><h2>Olay Geçmişi</h2><p>Senkronlar, API hataları ve zarar kayıtları.</p></div></div><div id="eventsList" class="event-list"></div></section></section>
+  </main>
+</div>
+<div id="toast"></div>
+<script src="/static/app.js?v=10.1.2"></script>
+  <script src="/static/wallboard.js?v=10.0.6"></script>
+</body></html>

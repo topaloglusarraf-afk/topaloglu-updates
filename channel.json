@@ -1,17 +1,37 @@
 {
-  "version": "10.1.1",
+  "version": "10.1.2",
   "published_at": "2026-08-14",
-  "notes": "Kritik kayıtları sıfırlama, ortak ekran yenileme ve kontrol dışı pazaryeri kayıtlarını temizleme.",
+  "notes": "Ürün/isim/kategori bazlı fiyat kontrolü hariç tutma, sessiz izleme ve premium kontrol odası tasarımı.",
   "files": [
     {
+      "path": "app/db.py",
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.2/app/db.py",
+      "sha256": "6a697225ec83edb45cd7435c04ba5c8ea62224797775ac205ab3c74a0dcc471b"
+    },
+    {
+      "path": "app/service.py",
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.2/app/service.py",
+      "sha256": "34417b0443144114082d25302183f9ca5c05fc58be4495679fccba3e5d860d70"
+    },
+    {
       "path": "app/main.py",
-      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.1/app/main.py",
-      "sha256": "9326e08c4ef5e304bd3f9c5817e00ef1fed8582bfca57f43b040248caf7bc558"
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.2/app/main.py",
+      "sha256": "082f5dbf1f7bf99f409c66588f764806aa32dfd36962c095eba0627c50edced9"
+    },
+    {
+      "path": "app/static/index.html",
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.2/app/static/index.html",
+      "sha256": "43ef4df5e1727ed111284c23c0d23b07dbf4e7b85952d918b804eb318a569622"
     },
     {
       "path": "app/static/app.js",
-      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.1/app/static/app.js",
-      "sha256": "64a68b3b8840328b9289d092dda262ff4bc0d7f4090b6274bbbb79f57f5e8c29"
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.2/app/static/app.js",
+      "sha256": "ce53701d45a1d98144ef18f690afa4e0c5865f4d1cb46eee8ece3064b820de3c"
+    },
+    {
+      "path": "app/static/style.css",
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.2/app/static/style.css",
+      "sha256": "3dc910e199232359d51dbddb41363c3f14bc830daccdf17762961ac36155a7e4"
     }
   ]
 }
