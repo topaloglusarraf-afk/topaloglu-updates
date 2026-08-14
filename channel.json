@@ -1,32 +1,17 @@
 {
-  "version": "10.1.4",
+  "version": "10.1.5",
   "published_at": "2026-08-14",
-  "notes": "Alarm toleransı 1300 TL; panelden tolerans kaydı düzeltildi; kritik Yenile/Sıfırla düzeltildi; barkod veya stok kodunda ET olmayan ürünler tamamen reddedilir ve eski kayıtlar temizlenir.",
+  "notes": "Sarı WARNING kayıtları normal kabul edilir; ortak ekran yalnız kritik fiyat hatalarını gösterir. Fiyatlar tutuyor/tutmuyor durumu ve manuel kontrol uyarısı eklendi.",
   "files": [
     {
-      "path": "app/db.py",
-      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.4/app/db.py",
-      "sha256": "469d8f1ff8e3bf17bc63b38576f51c1f302b5365f696b89399fb48457267ed38"
-    },
-    {
-      "path": "app/service.py",
-      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.4/app/service.py",
-      "sha256": "d9b2e2fe45b4007d9dd4e92f05e906d79c616fb7c82a3a2e7fc97e433cb3cc93"
-    },
-    {
-      "path": "app/main.py",
-      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.4/app/main.py",
-      "sha256": "dbe22da89178837a22c77ace5af6cff86d42d99cd01fe187a98be62b06774d92"
-    },
-    {
       "path": "app/static/app.js",
-      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.4/app/static/app.js",
-      "sha256": "8c699fd11f4f3a2ba88da7f46b69f65717b021f7ff58833cb4f71ab618534796"
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.5/app/static/app.js",
+      "sha256": "d91066f43936d9192996e0fd894c2bcf4e82d233da1ea4b3998cd5f115f4a14c"
     },
     {
       "path": "app/static/style.css",
-      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.4/app/static/style.css",
-      "sha256": "3c969443b6135a3772001f812bdd55c61973ebae8cacd52cc7a0fc57cbdbc03a"
+      "url": "https://raw.githubusercontent.com/topaloglusarraf-afk/topaloglu-updates/main/direct/10.1.5/app/static/style.css",
+      "sha256": "ede5ceed75bb36bce08955584df5507e34035972165a45200c67f5f3b6159691"
     }
   ]
 }
