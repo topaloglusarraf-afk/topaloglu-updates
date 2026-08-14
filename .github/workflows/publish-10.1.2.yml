@@ -1,0 +1,34 @@
+name: Publish 10.1.2 Direct Files
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-10.1.2.yml'
+      - 'tools/publish_10_1_2.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep exact bytes
+        shell: bash
+        run: git config core.autocrlf false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and validate direct files
+        run: python tools/publish_10_1_2.py
+      - name: Publish direct update
+        shell: bash
+        run: |
+          git config user.name "Topaloglu Update Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add direct/10.1.2 channel.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish direct update 10.1.2"
+          git push
