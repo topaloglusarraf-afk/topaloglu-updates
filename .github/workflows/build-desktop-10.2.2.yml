@@ -25,6 +25,9 @@ jobs:
           python tools/build_desktop_10_2_0.py
           python tools/patch_desktop_runtime_10_2_0.py
           python tools/patch_desktop_10_2_1.py
+          $patch = Get-Content 'tools/patch_desktop_10_2_2.py' -Raw
+          $patch = $patch.Replace("css += r'''", "s += r'''")
+          Set-Content 'tools/patch_desktop_10_2_2.py' -Value $patch -Encoding utf8
           python tools/patch_desktop_10_2_2.py
           $app = Get-ChildItem _desktop_src -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'app') } | Select-Object -First 1
           if (-not $app) { throw 'App root not found' }
