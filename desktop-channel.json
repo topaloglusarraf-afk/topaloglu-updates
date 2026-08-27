@@ -1,7 +1,7 @@
 {
-  "version": "10.2.8",
+  "version": "10.2.9",
   "published_at": "2026-08-27",
-  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.8/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.8.exe",
-  "sha256": "06007bd3f5befb90425fdcf7e71b66d19ec28947c564ebda1043a9497a8787ed",
-  "notes": "Hepsiburada Chrome uzantısı için temiz ve doğru klasör seçimi düzeltildi."
+  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.9/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.9.exe",
+  "sha256": "adc5c413d84e6e0a9ce4a12117974023a212f28bd4bfcafc1a481f9758a4632a",
+  "notes": "Hepsiburada Chrome köprüsü v1.1.0; açık sekmeye otomatik bağlanır ve eski uzantı karışıklığını giderir."
 }
