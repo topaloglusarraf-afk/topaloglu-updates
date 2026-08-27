@@ -1,7 +1,7 @@
 {
-  "version": "10.2.0",
+  "version": "10.2.1",
   "published_at": "2026-08-27",
-  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.0/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.0.exe",
-  "sha256": "0f829144e86cc168c9a2408156d3ae3bb561cb2c161f28f9be3657b64a0d54f1",
-  "notes": "Windows masaüstü uygulaması; CMD ve tarayıcı olmadan tek pencerede çalışır."
+  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.1/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.1.exe",
+  "sha256": "b712671af63a647d64853fcecba09a0b0b4c9ae7b6443232a6538f4cf4775b3d",
+  "notes": "Windows masaüstü açılışındaki Uvicorn logging/isatty hatası düzeltildi."
 }
