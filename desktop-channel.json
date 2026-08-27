@@ -1,7 +1,7 @@
 {
-  "version": "10.2.2",
+  "version": "10.2.3",
   "published_at": "2026-08-27",
-  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.2/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.2.exe",
-  "sha256": "6b016bf6eaab4beb659c0893881bb6d737c3bd2007a0d1b2c1d9eea181f94d9b",
-  "notes": "Masaüstü sürüm numarası düzeltildi; güvenli .env Ayarlar & Bağlantılar ekranı eklendi."
+  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.3/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.3.exe",
+  "sha256": "35341c7df1f720436b028b89551f9fb27def308a7d1044e214e9c955753def7d",
+  "notes": "Sürüm görünümü ve uygulama içi .env Ayarlar & Bağlantılar ekranı kalıcı olarak düzeltildi."
 }
