@@ -1,0 +1,131 @@
+name: Build Desktop 10.2.9
+
+on:
+  push:
+    paths:
+      - 'tools/patch_desktop_10_2_9.py'
+      - '.github/workflows/build-desktop-10.2.9.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Prepare desktop source
+        shell: pwsh
+        run: |
+          python tools/build_desktop_10_2_0.py
+          python tools/patch_desktop_runtime_10_2_0.py
+          python tools/patch_desktop_10_2_1.py
+          python tools/patch_desktop_10_2_3.py
+          python tools/patch_desktop_10_2_4.py
+          python tools/patch_desktop_10_2_5.py
+          python tools/patch_desktop_10_2_6.py
+          python tools/patch_desktop_10_2_7.py
+          python tools/patch_desktop_10_2_8.py
+          python tools/patch_desktop_10_2_9.py
+          $app = Get-ChildItem _desktop_src -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'app') } | Select-Object -First 1
+          if (-not $app) { throw 'App root not found' }
+          "APPDIR=$($app.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r "$env:APPDIR\requirements.txt"
+          pip install -r "$env:APPDIR\desktop_requirements.txt"
+
+      - name: Validate source and self-healing extension
+        shell: pwsh
+        run: |
+          python -m py_compile "$env:APPDIR\desktop_launcher.py" "$env:APPDIR\app\main.py" "$env:APPDIR\app\service.py"
+          node --check "$env:APPDIR\chrome-extension\background.js"
+          node --check "$env:APPDIR\chrome-extension\content.js"
+          node --check "$env:APPDIR\chrome-extension\main_hook.js"
+          node --check "$env:APPDIR\chrome-extension\popup.js"
+          $manifest=Get-Content "$env:APPDIR\chrome-extension\manifest.json" -Raw
+          $popup=Get-Content "$env:APPDIR\chrome-extension\popup.js" -Raw
+          $idx=Get-Content "$env:APPDIR\app\static\index.html" -Raw
+          if ($manifest -notmatch '"version": "1.1.0"') { throw 'Extension 1.1.0 missing' }
+          if ($manifest -notmatch '"scripting"') { throw 'Scripting permission missing' }
+          if ($manifest -notmatch '\*\.hepsiburada\.com') { throw 'Broad HB host permission missing' }
+          if ($popup -notmatch 'executeScript') { throw 'Self injection missing' }
+          if ($idx -notmatch 'hepsiburada_bridge.js\?v=10.2.9') { throw 'UI version stale' }
+
+      - name: Build desktop executable
+        shell: pwsh
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          pyinstaller --noconfirm --clean --windowed `
+            --name "Topaloglu Pazaryeri Merkezi" `
+            --collect-all webview `
+            --collect-submodules app `
+            --hidden-import uvicorn.logging `
+            --hidden-import uvicorn.loops.auto `
+            --hidden-import uvicorn.protocols.http.auto `
+            --hidden-import uvicorn.protocols.websockets.auto `
+            --hidden-import uvicorn.lifespan.on `
+            --add-data "app/static;app/static" `
+            desktop_launcher.py
+
+      - name: Copy and verify Chrome extension
+        shell: pwsh
+        run: |
+          $distRoot=Join-Path $env:APPDIR 'dist\Topaloglu Pazaryeri Merkezi'
+          Copy-Item "$env:APPDIR\chrome-extension" (Join-Path $distRoot 'chrome-extension') -Recurse -Force
+          $ext=Join-Path $distRoot 'chrome-extension'
+          $manifest=Get-Content (Join-Path $ext 'manifest.json') -Raw
+          $popup=Get-Content (Join-Path $ext 'popup.js') -Raw
+          if ($manifest -notmatch '"version": "1.1.0"') { throw 'Packaged extension version stale' }
+          if ($popup -notmatch 'executeScript') { throw 'Packaged self injection missing' }
+          if (Test-Path (Join-Path $ext '_internal')) { throw 'Extension folder polluted with _internal' }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe')) { choco install innosetup -y --no-progress }
+
+      - name: Build installer
+        shell: pwsh
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' desktop_installer.iss
+          $installer=Join-Path $env:APPDIR 'installer\Topaloglu-Pazaryeri-Merkezi-Setup-10.2.9.exe'
+          if (-not (Test-Path $installer)) { throw 'Installer not produced' }
+          $hash=(Get-FileHash $installer -Algorithm SHA256).Hash.ToLower()
+          "INSTALLER=$installer" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "INSTALLER_SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete v10.2.9 --repo $env:GITHUB_REPOSITORY --yes 2>$null; if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE=0 }
+          git push origin :refs/tags/v10.2.9 2>$null; if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE=0 }
+          gh release create v10.2.9 "$env:INSTALLER" --repo $env:GITHUB_REPOSITORY --title 'Topaloğlu Pazaryeri Merkezi 10.2.9' --notes 'Hepsiburada Chrome köprüsü v1.1.0: eski uzantı karışıklığını görünür hale getirir, tüm Hepsiburada alt alanlarını kapsar ve açık sekmeye scripti otomatik enjekte eder; sekme yenileme zorunluluğunu kaldırır.'
+
+      - name: Publish desktop channel
+        shell: pwsh
+        run: |
+          $obj=[ordered]@{version='10.2.9';published_at=(Get-Date -Format 'yyyy-MM-dd');installer_url='https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.9/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.9.exe';sha256=$env:INSTALLER_SHA256;notes='Hepsiburada Chrome köprüsü v1.1.0; açık sekmeye otomatik bağlanır ve eski uzantı karışıklığını giderir.'}
+          $obj | ConvertTo-Json | Set-Content desktop-channel.json -Encoding utf8
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git pull --rebase origin main
+          git add desktop-channel.json
+          git commit -m 'Publish desktop 10.2.9 channel' || echo 'No changes'
+          git push
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Topaloglu-Pazaryeri-Merkezi-Setup-10.2.9
+          path: ${{ env.INSTALLER }}
