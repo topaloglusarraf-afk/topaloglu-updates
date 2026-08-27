@@ -1,0 +1,107 @@
+name: Build Desktop 10.2.1
+
+on:
+  push:
+    paths:
+      - 'tools/patch_desktop_10_2_1.py'
+      - '.github/workflows/build-desktop-10.2.1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Prepare desktop source
+        shell: pwsh
+        run: |
+          python tools/build_desktop_10_2_0.py
+          python tools/patch_desktop_runtime_10_2_0.py
+          python tools/patch_desktop_10_2_1.py
+          $app = Get-ChildItem _desktop_src -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'app') } | Select-Object -First 1
+          if (-not $app) { throw 'App root not found' }
+          "APPDIR=$($app.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r "$env:APPDIR\requirements.txt"
+          pip install -r "$env:APPDIR\desktop_requirements.txt"
+
+      - name: Validate Python source
+        shell: pwsh
+        run: |
+          python -m py_compile "$env:APPDIR\desktop_launcher.py" "$env:APPDIR\app\main.py" "$env:APPDIR\app\service.py" "$env:APPDIR\app\db.py"
+
+      - name: Build desktop executable
+        shell: pwsh
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          pyinstaller --noconfirm --clean --windowed `
+            --name "Topaloglu Pazaryeri Merkezi" `
+            --collect-all webview `
+            --collect-submodules app `
+            --hidden-import uvicorn.logging `
+            --hidden-import uvicorn.loops.auto `
+            --hidden-import uvicorn.protocols.http.auto `
+            --hidden-import uvicorn.protocols.websockets.auto `
+            --hidden-import uvicorn.lifespan.on `
+            --add-data "app/static;app/static" `
+            desktop_launcher.py
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe')) {
+            choco install innosetup -y --no-progress
+          }
+
+      - name: Build installer
+        shell: pwsh
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' desktop_installer.iss
+          $installer = Join-Path $env:APPDIR 'installer\Topaloglu-Pazaryeri-Merkezi-Setup-10.2.1.exe'
+          if (-not (Test-Path $installer)) { throw 'Installer not produced' }
+          $hash=(Get-FileHash $installer -Algorithm SHA256).Hash.ToLower()
+          "INSTALLER=$installer" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "INSTALLER_SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete v10.2.1 --repo $env:GITHUB_REPOSITORY --yes 2>$null; if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE=0 }
+          git push origin :refs/tags/v10.2.1 2>$null; if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE=0 }
+          gh release create v10.2.1 "$env:INSTALLER" --repo $env:GITHUB_REPOSITORY --title 'Topaloğlu Pazaryeri Merkezi 10.2.1' --notes 'Windows masaüstü uygulamasında Uvicorn logging/isatty açılış hatası düzeltildi.'
+
+      - name: Publish desktop channel
+        shell: pwsh
+        run: |
+          $obj = [ordered]@{
+            version='10.2.1'
+            published_at=(Get-Date -Format 'yyyy-MM-dd')
+            installer_url='https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.1/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.1.exe'
+            sha256=$env:INSTALLER_SHA256
+            notes='Windows masaüstü açılışındaki Uvicorn logging/isatty hatası düzeltildi.'
+          }
+          $obj | ConvertTo-Json | Set-Content desktop-channel.json -Encoding utf8
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add desktop-channel.json
+          git commit -m 'Publish desktop 10.2.1 channel' || echo 'No changes'
+          git push
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Topaloglu-Pazaryeri-Merkezi-Setup-10.2.1
+          path: ${{ env.INSTALLER }}
