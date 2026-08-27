@@ -1,7 +1,7 @@
 {
-  "version": "10.2.5",
+  "version": "10.2.6",
   "published_at": "2026-08-27",
-  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.5/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.5.exe",
-  "sha256": "6e5c85143a545b1b1ace40ba2916d633b212fd01cd0f9368b3ab0d54a9a4039e",
-  "notes": "WebView önbellek sorunu giderildi; tam ekran CMD METE açılışı ve command-center tasarımı eklendi."
+  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.6/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.6.exe",
+  "sha256": "928bc85cb8aa2b0be6406e92d6c888aa97b264d5b186a00b43a90dabd95e8178",
+  "notes": "Hepsiburada bağlantı alanları sadeleştirildi ve doğrudan bağlantı testi eklendi."
 }
