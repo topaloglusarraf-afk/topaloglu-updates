@@ -1,0 +1,120 @@
+name: Build Desktop 10.2.6
+
+on:
+  push:
+    paths:
+      - 'tools/patch_desktop_10_2_6.py'
+      - '.github/workflows/build-desktop-10.2.6.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Prepare desktop source
+        shell: pwsh
+        run: |
+          python tools/build_desktop_10_2_0.py
+          python tools/patch_desktop_runtime_10_2_0.py
+          python tools/patch_desktop_10_2_1.py
+          python tools/patch_desktop_10_2_3.py
+          python tools/patch_desktop_10_2_4.py
+          python tools/patch_desktop_10_2_5.py
+          python tools/patch_desktop_10_2_6.py
+          $app = Get-ChildItem _desktop_src -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'app') } | Select-Object -First 1
+          if (-not $app) { throw 'App root not found' }
+          "APPDIR=$($app.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r "$env:APPDIR\requirements.txt"
+          pip install -r "$env:APPDIR\desktop_requirements.txt"
+
+      - name: Validate source and Hepsiburada settings
+        shell: pwsh
+        run: |
+          python -m py_compile "$env:APPDIR\desktop_launcher.py" "$env:APPDIR\app\main.py"
+          $idx=Get-Content "$env:APPDIR\app\static\index.html" -Raw
+          $hb=Get-Content "$env:APPDIR\app\static\hepsiburada_settings.js" -Raw
+          $main=Get-Content "$env:APPDIR\app\main.py" -Raw
+          $launcher=Get-Content "$env:APPDIR\desktop_launcher.py" -Raw
+          if ($idx -notmatch 'hepsiburada_settings.js\?v=10.2.6') { throw 'HB settings script missing' }
+          if ($hb -notmatch 'Servis Anahtarı / API Şifresi') { throw 'Simplified HB form missing' }
+          if ($main -notmatch '/api/hepsiburada/test-connection') { throw 'HB connection test endpoint missing' }
+          if ($launcher -notmatch 'HEPSIBURADA_SERVICE_KEY') { throw 'HB service key compatibility missing' }
+
+      - name: Build desktop executable
+        shell: pwsh
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          pyinstaller --noconfirm --clean --windowed `
+            --name "Topaloglu Pazaryeri Merkezi" `
+            --collect-all webview `
+            --collect-submodules app `
+            --hidden-import uvicorn.logging `
+            --hidden-import uvicorn.loops.auto `
+            --hidden-import uvicorn.protocols.http.auto `
+            --hidden-import uvicorn.protocols.websockets.auto `
+            --hidden-import uvicorn.lifespan.on `
+            --add-data "app/static;app/static" `
+            desktop_launcher.py
+
+      - name: Verify packaged static files
+        shell: pwsh
+        run: |
+          $dist=Join-Path $env:APPDIR 'dist\Topaloglu Pazaryeri Merkezi\_internal\app\static'
+          if (-not (Test-Path (Join-Path $dist 'hepsiburada_settings.js'))) { throw 'Packaged HB settings JS missing' }
+          $idx=Get-Content (Join-Path $dist 'index.html') -Raw
+          if ($idx -notmatch 'v10.2.6') { throw 'Packaged version wrong' }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe')) { choco install innosetup -y --no-progress }
+
+      - name: Build installer
+        shell: pwsh
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' desktop_installer.iss
+          $installer=Join-Path $env:APPDIR 'installer\Topaloglu-Pazaryeri-Merkezi-Setup-10.2.6.exe'
+          if (-not (Test-Path $installer)) { throw 'Installer not produced' }
+          $hash=(Get-FileHash $installer -Algorithm SHA256).Hash.ToLower()
+          "INSTALLER=$installer" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "INSTALLER_SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete v10.2.6 --repo $env:GITHUB_REPOSITORY --yes 2>$null; if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE=0 }
+          git push origin :refs/tags/v10.2.6 2>$null; if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE=0 }
+          gh release create v10.2.6 "$env:INSTALLER" --repo $env:GITHUB_REPOSITORY --title 'Topaloğlu Pazaryeri Merkezi 10.2.6' --notes 'Hepsiburada bağlantı ekranı güncel kimlik doğrulama yapısına göre sadeleştirildi. Merchant ID, API/Entegratör kullanıcı adı ve tek servis anahtarı/şifre alanı ile bağlantı testi eklendi.'
+
+      - name: Publish desktop channel
+        shell: pwsh
+        run: |
+          $obj=[ordered]@{version='10.2.6';published_at=(Get-Date -Format 'yyyy-MM-dd');installer_url='https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.6/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.6.exe';sha256=$env:INSTALLER_SHA256;notes='Hepsiburada bağlantı alanları sadeleştirildi ve doğrudan bağlantı testi eklendi.'}
+          $obj | ConvertTo-Json | Set-Content desktop-channel.json -Encoding utf8
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git pull --rebase origin main
+          git add desktop-channel.json
+          git commit -m 'Publish desktop 10.2.6 channel' || echo 'No changes'
+          git push
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Topaloglu-Pazaryeri-Merkezi-Setup-10.2.6
+          path: ${{ env.INSTALLER }}
