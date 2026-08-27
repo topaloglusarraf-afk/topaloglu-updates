@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'tools/patch_desktop_10_2_8.py'
+      - 'tools/patch_desktop_10_2_8_fix.py'
       - '.github/workflows/build-desktop-10.2.8.yml'
   workflow_dispatch:
 
@@ -31,6 +32,7 @@ jobs:
           python tools/patch_desktop_10_2_6.py
           python tools/patch_desktop_10_2_7.py
           python tools/patch_desktop_10_2_8.py
+          python tools/patch_desktop_10_2_8_fix.py
           $app = Get-ChildItem _desktop_src -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'app') } | Select-Object -First 1
           if (-not $app) { throw 'App root not found' }
           "APPDIR=$($app.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
