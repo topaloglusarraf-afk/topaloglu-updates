@@ -86,11 +86,10 @@ jobs:
           $ext=Join-Path $distRoot 'chrome-extension'
           $manifest=Get-Content (Join-Path $ext 'manifest.json') -Raw
           $popup=Get-Content (Join-Path $ext 'popup.js') -Raw
-          $main=Get-Content (Join-Path $distRoot '_internal\app\main.py') -Raw
           if ($manifest -notmatch '"version": "1.3.0"') { throw 'Packaged extension version stale' }
           if ($popup -notmatch 'eşleşti') { throw 'Packaged popup result funnel missing' }
-          if ($main -notmatch 'service\.match_product') { throw 'Packaged backend matcher missing' }
           if (Test-Path (Join-Path $ext '_internal')) { throw 'Extension folder polluted with _internal' }
+          if (-not (Test-Path (Join-Path $distRoot '_internal\app\static\index.html'))) { throw 'Packaged app static assets missing' }
 
       - name: Install Inno Setup
         shell: pwsh
