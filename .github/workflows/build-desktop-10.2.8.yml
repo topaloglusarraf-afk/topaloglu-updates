@@ -1,0 +1,129 @@
+name: Build Desktop 10.2.8
+
+on:
+  push:
+    paths:
+      - 'tools/patch_desktop_10_2_8.py'
+      - '.github/workflows/build-desktop-10.2.8.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Prepare desktop source
+        shell: pwsh
+        run: |
+          python tools/build_desktop_10_2_0.py
+          python tools/patch_desktop_runtime_10_2_0.py
+          python tools/patch_desktop_10_2_1.py
+          python tools/patch_desktop_10_2_3.py
+          python tools/patch_desktop_10_2_4.py
+          python tools/patch_desktop_10_2_5.py
+          python tools/patch_desktop_10_2_6.py
+          python tools/patch_desktop_10_2_7.py
+          python tools/patch_desktop_10_2_8.py
+          $app = Get-ChildItem _desktop_src -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'app') } | Select-Object -First 1
+          if (-not $app) { throw 'App root not found' }
+          "APPDIR=$($app.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r "$env:APPDIR\requirements.txt"
+          pip install -r "$env:APPDIR\desktop_requirements.txt"
+
+      - name: Validate source and clean extension UX
+        shell: pwsh
+        run: |
+          python -m py_compile "$env:APPDIR\desktop_launcher.py" "$env:APPDIR\app\main.py" "$env:APPDIR\app\service.py"
+          $idx=Get-Content "$env:APPDIR\app\static\index.html" -Raw
+          $bridge=Get-Content "$env:APPDIR\app\static\hepsiburada_bridge.js" -Raw
+          $main=Get-Content "$env:APPDIR\app\main.py" -Raw
+          $manifest=Get-Content "$env:APPDIR\chrome-extension\manifest.json" -Raw
+          if ($idx -notmatch 'hepsiburada_bridge.js\?v=10.2.8') { throw 'HB bridge 10.2.8 cache-bust missing' }
+          if ($bridge -notmatch 'Topaloglu-Hepsiburada-Uzantisi') { throw 'Clean extension folder UX missing' }
+          if ($bridge -notmatch 'Yolu Kopyala') { throw 'Copy path button missing' }
+          if ($main -notmatch '_prepare_hb_extension_1028') { throw 'Clean extension prepare backend missing' }
+          if ($main -notmatch 'manifest.json') { throw 'Manifest validation missing' }
+          if ($manifest -notmatch 'Topaloğlu Hepsiburada Köprüsü') { throw 'Extension manifest missing' }
+
+      - name: Build desktop executable
+        shell: pwsh
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          pyinstaller --noconfirm --clean --windowed `
+            --name "Topaloglu Pazaryeri Merkezi" `
+            --collect-all webview `
+            --collect-submodules app `
+            --hidden-import uvicorn.logging `
+            --hidden-import uvicorn.loops.auto `
+            --hidden-import uvicorn.protocols.http.auto `
+            --hidden-import uvicorn.protocols.websockets.auto `
+            --hidden-import uvicorn.lifespan.on `
+            --add-data "app/static;app/static" `
+            desktop_launcher.py
+
+      - name: Copy and verify Chrome extension
+        shell: pwsh
+        run: |
+          $distRoot=Join-Path $env:APPDIR 'dist\Topaloglu Pazaryeri Merkezi'
+          Copy-Item "$env:APPDIR\chrome-extension" (Join-Path $distRoot 'chrome-extension') -Recurse -Force
+          $ext=Join-Path $distRoot 'chrome-extension'
+          if (-not (Test-Path (Join-Path $ext 'manifest.json'))) { throw 'Packaged manifest missing' }
+          if (Test-Path (Join-Path $ext '_internal')) { throw 'Extension folder polluted with _internal' }
+          $idx=Get-Content (Join-Path $distRoot '_internal\app\static\index.html') -Raw
+          $bridge=Get-Content (Join-Path $distRoot '_internal\app\static\hepsiburada_bridge.js') -Raw
+          if ($idx -notmatch 'hepsiburada_bridge.js\?v=10.2.8') { throw 'Packaged bridge version stale' }
+          if ($bridge -notmatch 'Topaloglu-Hepsiburada-Uzantisi') { throw 'Packaged clean folder UX missing' }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe')) { choco install innosetup -y --no-progress }
+
+      - name: Build installer
+        shell: pwsh
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' desktop_installer.iss
+          $installer=Join-Path $env:APPDIR 'installer\Topaloglu-Pazaryeri-Merkezi-Setup-10.2.8.exe'
+          if (-not (Test-Path $installer)) { throw 'Installer not produced' }
+          $hash=(Get-FileHash $installer -Algorithm SHA256).Hash.ToLower()
+          "INSTALLER=$installer" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "INSTALLER_SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete v10.2.8 --repo $env:GITHUB_REPOSITORY --yes 2>$null; if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE=0 }
+          git push origin :refs/tags/v10.2.8 2>$null; if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE=0 }
+          gh release create v10.2.8 "$env:INSTALLER" --repo $env:GITHUB_REPOSITORY --title 'Topaloğlu Pazaryeri Merkezi 10.2.8' --notes 'Hepsiburada Chrome uzantısı PyInstaller uygulama klasöründen ayrıldı. Uygulama yalnız manifest ve uzantı dosyalarını içeren temiz Topaloglu-Hepsiburada-Uzantisi klasörünü hazırlar ve açar.'
+
+      - name: Publish desktop channel
+        shell: pwsh
+        run: |
+          $obj=[ordered]@{version='10.2.8';published_at=(Get-Date -Format 'yyyy-MM-dd');installer_url='https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.8/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.8.exe';sha256=$env:INSTALLER_SHA256;notes='Hepsiburada Chrome uzantısı için temiz ve doğru klasör seçimi düzeltildi.'}
+          $obj | ConvertTo-Json | Set-Content desktop-channel.json -Encoding utf8
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git pull --rebase origin main
+          git add desktop-channel.json
+          git commit -m 'Publish desktop 10.2.8 channel' || echo 'No changes'
+          git push
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Topaloglu-Pazaryeri-Merkezi-Setup-10.2.8
+          path: ${{ env.INSTALLER }}
