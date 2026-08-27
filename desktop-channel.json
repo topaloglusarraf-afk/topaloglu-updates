@@ -1,7 +1,7 @@
 {
-  "version": "10.2.10",
+  "version": "10.2.11",
   "published_at": "2026-08-27",
-  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.10/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.10.exe",
-  "sha256": "1dc37805ef6dc9f3c3c18eef8eba7032978678de8859f34e25361a9caa2460dc",
-  "notes": "Hepsiburada 2026ET stok kodu ve fiyat/stok input okuma düzeltildi."
+  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.11/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.11.exe",
+  "sha256": "04311619c5881a9955298e610232819fa56e9cfee8ce2a498d1539a95eb8ae46",
+  "notes": "Hepsiburada gönderilen satırlar artık uygulamada gerçek eşleştirme motoruna giriyor ve sonuç sayaçları gösteriliyor."
 }
