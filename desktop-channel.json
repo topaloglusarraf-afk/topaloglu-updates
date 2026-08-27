@@ -1,0 +1,7 @@
+{
+  "version": "10.2.0",
+  "published_at": "2026-08-27",
+  "installer_url": "https://github.com/topaloglusarraf-afk/topaloglu-updates/releases/download/v10.2.0/Topaloglu-Pazaryeri-Merkezi-Setup-10.2.0.exe",
+  "sha256": "0f829144e86cc168c9a2408156d3ae3bb561cb2c161f28f9be3657b64a0d54f1",
+  "notes": "Windows masaüstü uygulaması; CMD ve tarayıcı olmadan tek pencerede çalışır."
+}
